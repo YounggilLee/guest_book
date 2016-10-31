@@ -20,7 +20,8 @@ import model.Message;
  *
  * @author yglee
  */
-public class MessageDao {
+public class MessageDao {    
+        // using single tone pattern to use only one object
 	private static MessageDao messageDao = new MessageDao();
 	public static MessageDao getInstance() {
 		return messageDao;
@@ -28,21 +29,25 @@ public class MessageDao {
 	
 	private MessageDao() {}
 	
+        // this method is for insert data to database         
 	public int insert(Connection conn, Message message) throws SQLException {
 		PreparedStatement pstmt = null;
 		try {
 			pstmt = conn.prepareStatement(
 					"insert into guestbook_message " + 
 					"(guest_name, password, message) values (?, ?, ?)");
+                        // input values using prepareStatement except m_id that will be increased
 			pstmt.setString(1, message.getGuestName());
 			pstmt.setString(2, message.getPassword());
 			pstmt.setString(3, message.getMessage());
+                        
 			return pstmt.executeUpdate();
 		} finally {
 			JdbcUtil.close(pstmt);
 		}
 	}
-
+        
+        // read the database and puts the values in message class
 	public Message select(Connection conn, int messageId) throws SQLException {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -61,7 +66,8 @@ public class MessageDao {
 			JdbcUtil.close(pstmt);
 		}
 	}
-
+        
+        // get result from select and select list method and puts data in the class
 	private Message makeMessageFromResultSet(ResultSet rs) throws SQLException {
 		Message message = new Message();
 		message.setId(rs.getInt("message_id"));
@@ -70,7 +76,7 @@ public class MessageDao {
 		message.setMessage(rs.getString("message"));
 		return message;
 	}
-
+        //count total records 
 	public int selectCount(Connection conn) throws SQLException {
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -84,7 +90,8 @@ public class MessageDao {
 			JdbcUtil.close(stmt);
 		}
 	}
-
+        
+        // descending message_id and put the result in arraylist and return
 	public List<Message> selectList(Connection conn, int firstRow, int endRow) 
 			throws SQLException {
 		PreparedStatement pstmt = null;
@@ -110,7 +117,8 @@ public class MessageDao {
 			JdbcUtil.close(pstmt);
 		}
 	}
-
+        
+        // this method is for deleting record
 	public int delete(Connection conn, int messageId) throws SQLException {
 		PreparedStatement pstmt = null;
 		try {
